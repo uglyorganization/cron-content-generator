@@ -34,17 +34,18 @@ jobs:
       - name: Read JSON content and set output
         id: read-json
         run: |
-          json_content=$(jq -c . < output.json)
-          echo "::set-output name=json_content::$json_content"
+          payload=$(jq -c . output.json)
+          echo "::set-output name=json_content::$payload"
 
-    - name: Trigger frontend workflow via curl
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT }}
-      run: |
-        payload=$(jq -c . output.json)
-        curl -X POST \
-          -H "Authorization: token ${GITHUB_TOKEN}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/uglyorganization/frontend/dispatches \
-          -d "{\"event_type\": \"trigger-deploy\", \"client_payload\": $payload}"
-      shell: bash
+      - name: Trigger frontend workflow via curl
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: |
+          payload=$(jq -c . output.json)
+          echo "Using payload: $payload"
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/uglyorganization/frontend/dispatches \
+            -d "{\"event_type\": \"trigger-deploy\", \"client_payload\": $payload}"
+        shell: bash
