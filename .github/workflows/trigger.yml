@@ -31,11 +31,11 @@ jobs:
           ls -l output.json
           cat output.json
 
-      - name: Read output.json and set as output
-        id: set-env
+      - name: Read JSON content and set output
+        id: read-json
         run: |
-          echo "::set-output name=json_payload::$(jq -c . < output.json)"
-        shell: bash
+          json_content=$(jq -c . < output.json)
+          echo "::set-output name=json_content::$json_content"
 
       - name: Trigger frontend workflow
         uses: peter-evans/repository-dispatch@v3
@@ -43,4 +43,4 @@ jobs:
           token: ${{ secrets.PAT }}
           repository: uglyorganization/frontend
           event-type: trigger-deploy
-          client-payload: ${{ toJson(steps.set-env.outputs.json_payload) }}
+          client-payload: ${{ steps.read-json.outputs.json_content }}
