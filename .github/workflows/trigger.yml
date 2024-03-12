@@ -31,13 +31,6 @@ jobs:
           ls -l output.json
           cat output.json
 
-      - name: Write output.json to file
-        run: echo "${{ steps.read-json.outputs.json }}" > output.env
-
-      - name: Set output from environment file
-        run: |
-          echo "JSON_PAYLOAD=$(<output.env)" >> $GITHUB_ENV
-
       - name: Trigger frontend workflow
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -45,3 +38,5 @@ jobs:
           repository: uglyorganization/frontend
           event-type: trigger-deploy
           client-payload: ${{ env.JSON_PAYLOAD }}
+        env:
+          JSON_PAYLOAD: $(cat output.json)
