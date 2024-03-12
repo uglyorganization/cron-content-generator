@@ -31,21 +31,23 @@ jobs:
           ls -l output.json
           cat output.json
 
-      - name: Read JSON content and set output
-        id: read-json
+      - name: Generate payload.json with event_type
         run: |
-          payload=$(jq -c . output.json)
-          echo "::set-output name=json_content::$payload"
+          jq '. | {event_type: "trigger-deploy", client_payload: .}' output.json > payload.json
+
+      - name: Verify payload.json
+        run: |
+          ls -l payload.json
+          cat payload.json
 
       - name: Trigger frontend workflow via curl
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          echo "Using payload: ${{ steps.read-json.outputs.json_content }}"
           curl -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             --fail \
-            https://api.github.com/repos/uglyorganization/frontend/dispatches \
-            -d "{\"event_type\": \"trigger-deploy\", \"client_payload\": ${{ steps.read-json.outputs.json_content }}"
+            -d @payload.json \
+            https://api.github.com/repos/uglyorganization/frontend/dispatches
         shell: bash
