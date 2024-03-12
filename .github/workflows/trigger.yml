@@ -31,12 +31,9 @@ jobs:
           ls -l output.json
           cat output.json
 
-      - name: Read output.json and set as environment variable
-        id: set-env
-        run: |
-          echo "JSON_PAYLOAD<<EOF" >> $GITHUB_ENV
-          cat output.json >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+      - name: Encode output.json and set as environment variable
+        run: echo "JSON_PAYLOAD_BASE64=$(cat output.json | base64)" >> $GITHUB_ENV
+        shell: bash
 
       - name: Trigger frontend workflow
         uses: peter-evans/repository-dispatch@v3
@@ -44,4 +41,4 @@ jobs:
           token: ${{ secrets.PAT }}
           repository: uglyorganization/frontend
           event-type: trigger-deploy
-          client-payload: ${{ toJson(env.JSON_PAYLOAD) }}
+          client-payload: '{"payload": "${{ fromBase64(env.JSON_PAYLOAD_BASE64) }}"}'
