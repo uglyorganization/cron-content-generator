@@ -11,17 +11,25 @@ jobs:
       - name: Checkout cron repository
         uses: actions/checkout@v4
 
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Generate output.json
+        run: go run main.go
+
       - name: Read output.json
         id: read-json
         run: |
-          ls -l  # List files in the current directory for debugging
-          if [ -f "output.json" ]; then
-            echo "File exists, reading contents..."
-            echo "::set-output name=json::$(cat output.json)"
-          else
-            echo "Error: output.json file not found"
-            exit 1
-          fi
+          cat output.json
+          echo "Payload: ${{ steps.read-json.outputs.json }}"
 
       - name: Trigger frontend workflow
         uses: peter-evans/repository-dispatch@v1
