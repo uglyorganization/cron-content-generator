@@ -23,13 +23,17 @@ jobs:
         run: go build -v ./...
 
       - name: Generate output.json
-        run: go run main.go
+        run: |
+          go run main.go || { echo "Error: Failed to generate output.json"; exit 1; }
+
+      - name: Verify output.json
+        run: |
+          ls -l output.json
+          cat output.json
 
       - name: Read output.json
         id: read-json
-        run: |
-          cat output.json
-          echo "Payload: ${{ steps.read-json.outputs.json }}"
+        run: echo "::set-output name=json::$(cat output.json)"
 
       - name: Trigger frontend workflow
         uses: peter-evans/repository-dispatch@v1
