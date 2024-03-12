@@ -89,7 +89,20 @@ func main() {
 		keyValueList = append(keyValueList, authorPair)
 	}
 
-	// Step 1: Open a file for writing
+	// Convert slice of structs to map
+	keyValueMap := make(map[string]authorPair)
+	for _, pair := range keyValueList {
+		keyValueMap[pair.User] = pair
+	}
+
+	// Marshal the map to JSON
+	jsonData, err := json.MarshalIndent(keyValueMap, "", "    ")
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	// Write the JSON data to the file
 	file, err := os.Create("output.json")
 	if err != nil {
 		fmt.Println("Error creating file:", err)
@@ -97,20 +110,13 @@ func main() {
 	}
 	defer file.Close()
 
-	// Step 2: Marshal the list of structs to JSON
-	jsonData, err := json.Marshal(keyValueList)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	// Step 3: Write the JSON data to the file
 	_, err = file.Write(jsonData)
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
 		return
 	}
 
+	fmt.Println("Data successfully written to output.json")
 }
 
 func getHTMLContent(url string) (string, error) {
