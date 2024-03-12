@@ -33,7 +33,7 @@ type authorPair struct {
 
 func main() {
 	authors := make(map[string]*authorInfo)
-	pages := 1798
+	pages := 3
 
 	for i := 0; i < pages+1; i++ {
 		log.Printf("iteration: %d\n", i)
