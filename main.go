@@ -89,14 +89,8 @@ func main() {
 		keyValueList = append(keyValueList, authorPair)
 	}
 
-	// Convert slice of structs to map
-	keyValueMap := make(map[string]authorPair)
-	for _, pair := range keyValueList {
-		keyValueMap[pair.User] = pair
-	}
-
 	// Marshal the map to JSON
-	jsonData, err := json.MarshalIndent(keyValueMap, "", "    ")
+	jsonData, err := json.MarshalIndent(keyValueList, "", "    ")
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return
