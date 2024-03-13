@@ -45,10 +45,10 @@ jobs:
         run: |
           aws s3 cp output.json s3://${{ secrets.SHARED_BUCKET }}/cron-content-generator/output.json
 
-      - name: Trigger Workflow to deploy frontend
+      - name: Trigger Workflow to deploy frontend-dev
         run: |
           curl -X POST \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token ${{ secrets.PAT }}" \
-          https://api.github.com/repos/uglyorganization/frontend/dispatches \
+          https://api.github.com/repos/uglyorganization/frontend-dev/dispatches \
           -d '{"event_type": "trigger-deploy"}' 
