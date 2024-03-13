@@ -11,6 +11,12 @@ jobs:
       - name: Checkout cron repository
         uses: actions/checkout@v4
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-shared-role
+          aws-region: eu-west-1
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -31,23 +37,14 @@ jobs:
           ls -l output.json
           cat output.json
 
-      - name: Generate payload.json with event_type
+      - name: Upload output.json to our shared bucket
         run: |
-          jq '. | {event_type: "trigger-deploy", client_payload: .}' output.json > payload.json
+          aws s3 cp output.json s3://${{ secrets.SHARED_BUCKET }}/cron-content-generator/output.json
 
-      - name: Verify payload.json
-        run: |
-          ls -l payload.json
-          cat payload.json
-
-      - name: Trigger frontend workflow via curl
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+      - name: Trigger Workflow to deploy frontend
         run: |
           curl -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            --fail \
-            -d @payload.json \
-            https://api.github.com/repos/uglyorganization/frontend/dispatches
-        shell: bash
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.PAT }}" \
+          https://api.github.com/repos/uglyorganization/frontend/dispatches \
+          -d '{"event_type": "trigger-deploy"}' 
