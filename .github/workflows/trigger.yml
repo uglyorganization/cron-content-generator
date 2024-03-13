@@ -3,6 +3,10 @@ name: Trigger Frontend Workflow
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   trigger:
     runs-on: ubuntu-latest
